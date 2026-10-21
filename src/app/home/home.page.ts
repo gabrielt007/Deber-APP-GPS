@@ -59,7 +59,40 @@ export class HomePage implements OnInit, OnDestroy {
     }
   }
 
+  // Guarda un archivo .txt con el enlace de la ubicación actual
+  async obtenerUbicacionActualtxt() {
+    // Si no hay coordenadas disponibles, se intentan obtener
+    if (this.latitude() === null || this.longitude() === null) {
+      await this.obtenerUbicacionActual();
+    }
+
+    const lat = this.latitude();
+    const lng = this.longitude();
+
+    if (lat === null || lng === null) {
+      this.errorMsg.set('No se pudo obtener la ubicación para guardar el archivo.');
+      return;
+    }
+
+    // Formato del contenido del archivo de texto
+    const contenido = `REPORTE DE UBICACIÓN
+----------------------------------------
+Fecha: ${new Date().toLocaleString()}
+Latitud: ${lat}
+Longitud: ${lng}
+Enlace: https://www.google.com/maps?q=${lat},${lng}
+----------------------------------------`;
+
+    // Crear y descargar el archivo .txt de forma sencilla
+    const blob = new Blob([contenido], { type: 'text/plain;charset=utf-8' });
+    const enlace = document.createElement('a');
+    enlace.href = URL.createObjectURL(blob);
+    enlace.download = 'ubicacion_actual.txt';
+    enlace.click();
+    URL.revokeObjectURL(enlace.href);
+  }
+
   ngOnDestroy() {
     if (this.watchId) this.loc.clearWatch(this.watchId);
   }
-}
+}

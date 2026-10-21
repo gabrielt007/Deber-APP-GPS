@@ -12,6 +12,8 @@
     <ion-card-content>
       <p><strong>Latitud:</strong> {{ latitude() }}</p>
       <p><strong>Longitud:</strong> {{ longitude() }}</p>
+      <p><strong>Ubicacion en Google Maps:</strong></p>
+      <a href="https://www.google.com/maps?q={{ latitude() }},{{ longitude() }}">Ubicacion en Google Maps</a>
     </ion-card-content>
   </ion-card>
 
@@ -28,4 +30,9 @@
   <ion-button expand="block" color="medium" (click)="detenerSeguimiento()" [disabled]="watchId === null">
     Detener seguimiento
   </ion-button>
+
+  <ion-button expand="block" (click)="obtenerUbicacionActualtxt()">
+    Guardar Ubicacion Actual
+  </ion-button>
+  
 </ion-content>
