@@ -9,7 +9,8 @@ import {
   IonContent, 
   IonHeader, 
   IonTitle, 
-  IonToolbar 
+  IonToolbar,
+  IonIcon,
 } from '@ionic/angular/standalone';
 import { NgIf } from '@angular/common';
 import { Capacitor } from '@capacitor/core';
@@ -22,7 +23,7 @@ import { LocationService } from '../services/location';
   imports: [
     IonHeader, IonToolbar, IonTitle, IonContent,
     IonCard, IonCardHeader, IonCardTitle, IonCardContent,
-    IonButton, NgIf
+    IonButton, IonIcon, NgIf
   ],
   templateUrl: './home.page.html',
   styleUrls: ['./home.page.scss']
@@ -33,10 +34,9 @@ export class HomePage implements OnInit, OnDestroy {
   watchId: string | null = null;
   errorMsg = signal<string | null>(null);
 
-
+  // Cooordenadas
   readonly DESTINO_LAT = -0.0753388; 
   readonly DESTINO_LNG = -78.4450883;
-
 
   constructor(
     private loc: LocationService,
@@ -80,9 +80,23 @@ export class HomePage implements OnInit, OnDestroy {
     }
   }
 
-  // Guarda un archivo .txt con el enlace de la ubicación actual
+  async mostrarRutaDestino() {
+    if (this.latitude() === null || this.longitude() === null) {
+      await this.obtenerUbicacionActual();
+      if (this.latitude() === null || this.longitude() === null) {
+        this.errorMsg.set('No se pudo obtener la ubicación actual para trazar la ruta.');
+        return;
+      }
+    }
+
+    const latActual = this.latitude();
+    const lngActual = this.longitude();
+    const urlRuta = `https://www.google.com/maps/dir/?api=1&origin=${latActual},${lngActual}&destination=${this.DESTINO_LAT},${this.DESTINO_LNG}`;
+
+    window.open(urlRuta, '_system');
+  }
+
   async obtenerUbicacionActualtxt() {
-    // Si no hay coordenadas disponibles, se intentan obtener
     if (this.latitude() === null || this.longitude() === null) {
       await this.obtenerUbicacionActual();
     }
@@ -95,7 +109,6 @@ export class HomePage implements OnInit, OnDestroy {
       return;
     }
 
-    // Formato del contenido del archivo de texto
     const contenido = `REPORTE DE UBICACIÓN
 ----------------------------------------
 Fecha: ${new Date().toLocaleString()}
@@ -104,19 +117,44 @@ Longitud: ${lng}
 Enlace: https://www.google.com/maps?q=${lat},${lng}
 ----------------------------------------`;
 
+    await this.ejecutarGuardadoArchivo('ubicacion_actual.txt', contenido);
+  }
+
+  async guardarRutaDestinoTxt() {
+    if (this.latitude() === null || this.longitude() === null) {
+      await this.obtenerUbicacionActual();
+      if (this.latitude() === null || this.longitude() === null) {
+        this.errorMsg.set('No se pudo obtener la ubicación para guardar la ruta.');
+        return;
+      }
+    }
+
+    const latActual = this.latitude();
+    const lngActual = this.longitude();
+    const urlRuta = `https://www.google.com/maps/dir/?api=1&origin=${latActual},${lngActual}&destination=${this.DESTINO_LAT},${this.DESTINO_LNG}`;
+
+    const contenido = `REPORTE DE RUTA
+----------------------------------------
+Fecha: ${new Date().toLocaleString()}
+Origen (Actual): Lat: ${latActual}, Lng: ${lngActual}
+Destino: Lat: ${this.DESTINO_LAT}, Lng: ${this.DESTINO_LNG}
+Enlace a la ruta: 
+${urlRuta}
+----------------------------------------`;
+
+    await this.ejecutarGuardadoArchivo('ruta_destino.txt', contenido);
+  }
+
+  private async ejecutarGuardadoArchivo(fileName: string, contenido: string) {
     try {
       if (Capacitor.isNativePlatform()) {
-        // En celular (Android / iOS): Guardar con @capacitor/filesystem
         try {
           const permStatus = await Filesystem.checkPermissions();
           if (permStatus.publicStorage !== 'granted') {
             await Filesystem.requestPermissions();
           }
-        } catch {
-          // Permisos gestionados automáticamente en versiones recientes de Android
-        }
+        } catch {}
 
-        const fileName = 'ubicacion_actual.txt';
         let res;
         try {
           res = await Filesystem.writeFile({
@@ -127,7 +165,6 @@ Enlace: https://www.google.com/maps?q=${lat},${lng}
             recursive: true
           });
         } catch {
-          // Si Documents presenta restricciones de permisos, guardar en directorio de datos de la app
           res = await Filesystem.writeFile({
             path: fileName,
             data: contenido,
@@ -138,34 +175,32 @@ Enlace: https://www.google.com/maps?q=${lat},${lng}
         }
 
         this.errorMsg.set(null);
-
         const alert = await this.alertCtrl.create({
-          header: 'Ubicación Guardada',
-          subHeader: 'Archivo guardado en el celular',
+          header: 'Archivo Guardado',
+          subHeader: 'Guardado en el celular',
           message: `El archivo "${fileName}" se guardó exitosamente.\n\nRuta:\n${res.uri}`,
           buttons: ['Aceptar']
         });
         await alert.present();
+
       } else {
-        // En computadora (Navegador web): Descarga automática mediante Blob
         const blob = new Blob([contenido], { type: 'text/plain;charset=utf-8' });
         const enlace = document.createElement('a');
         enlace.href = URL.createObjectURL(blob);
-        enlace.download = 'ubicacion_actual.txt';
+        enlace.download = fileName;
         enlace.click();
         URL.revokeObjectURL(enlace.href);
 
         this.errorMsg.set(null);
-
         const alert = await this.alertCtrl.create({
-          header: 'Ubicación Descargada',
-          message: 'El archivo "ubicacion_actual.txt" se ha descargado en tu equipo.',
+          header: 'Archivo Descargado',
+          message: `El archivo "${fileName}" se ha descargado en tu equipo.`,
           buttons: ['Aceptar']
         });
         await alert.present();
       }
     } catch (e: any) {
-      this.errorMsg.set(e?.message ?? 'Error al guardar el archivo de ubicación');
+      this.errorMsg.set(e?.message ?? 'Error al guardar el archivo');
       const alert = await this.alertCtrl.create({
         header: 'Error al Guardar',
         message: e?.message ?? 'No se pudo generar el archivo en el dispositivo.',
@@ -173,27 +208,6 @@ Enlace: https://www.google.com/maps?q=${lat},${lng}
       });
       await alert.present();
     }
-  }
-  
-  async mostrarRutaDestino() {
-    // 1. Verificar que tengamos coordenadas actuales
-    if (this.latitude() === null || this.longitude() === null) {
-      await this.obtenerUbicacionActual();
-      if (this.latitude() === null || this.longitude() === null) {
-        this.errorMsg.set('No se pudo obtener la ubicación actual para trazar la ruta.');
-        return;
-      }
-    }
-
-    // 2. Construir la URL con el formato oficial de Google Maps
-    const latActual = this.latitude();
-    const lngActual = this.longitude();
-    const urlRuta = `https://www.google.com/maps/dir/?api=1&origin=${latActual},${lngActual}&destination=${this.DESTINO_LAT},${this.DESTINO_LNG}`;
-
-    // 3. Abrir el enlace. 
-    // '_system' asegura que se abra la app nativa de Google Maps en el celular, 
-    // o el navegador por defecto en la computadora.
-    window.open(urlRuta, '_system');
   }
 
   ngOnDestroy() {

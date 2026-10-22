@@ -27,7 +27,6 @@
     Trazar ruta a mi destino
   </ion-button>
 
-
   <ion-button expand="block" (click)="iniciarSeguimiento()" [disabled]="watchId !== null">
     Iniciar seguimiento
   </ion-button>
@@ -38,6 +37,10 @@
 
   <ion-button expand="block" (click)="obtenerUbicacionActualtxt()">
     Guardar Ubicacion Actual
+  </ion-button>
+
+  <ion-button expand="block" color="tertiary" (click)="guardarRutaDestinoTxt()">
+    Guardar Ruta
   </ion-button>
   
 </ion-content>
