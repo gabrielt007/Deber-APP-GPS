@@ -215,6 +215,17 @@ Enlace: https://www.google.com/maps?q=-0.210345,-78.489123
 | **Ubicación no varía en emulador** | El emulador no tiene rutas configuradas. | En la ventana del emulador, abrir el panel lateral de opciones (`...`), ir a **Location** y enviar coordenadas manuales o simular una ruta. |
 
 ---
+## Imagenes del Funcionamiento
+
+| Permitir uso de Ubicación | Obtener Coordenadas Actuales | Trazar Ruta a mi Destino |
+|:---:|:---:|:---:|
+| <img src="https://github.com/user-attachments/assets/83b371ab-078b-4db8-87fa-ee9ee6a94829" width="200" alt="img1" /> | <img src="https://github.com/user-attachments/assets/6f5c7200-2ab8-4dfa-88b6-f6b2598c15cb" width="200" alt="img2" /> | <img src="https://github.com/user-attachments/assets/c2926b72-8a28-4690-8e77-c6e8eb0b6353" width="200" alt="img3" /> |
+| Guardar Ubicación Actual (txt) | Archivo Guardado | Reporte de Ubicación |
+| <img src="https://github.com/user-attachments/assets/525c4de9-10da-4666-ad3f-4e5a0f4c7850" width="200" alt="img4" /> | <img src="https://github.com/user-attachments/assets/24d52833-90de-4c1b-b9b2-a62bd7578b62" width="200" alt="img5" /> | <img src="https://github.com/user-attachments/assets/80400a9f-8c39-4068-bb3b-11f6d79e34e2" width="200" alt="img6" /> |
+| Guardar Ruta Destino (txt)| Archivo Guardado | Reporte de Ruta |
+| <img src="https://github.com/user-attachments/assets/de713cc5-3791-4b51-ba0d-2576d0a4eea9" width="200" alt="img7" /> | <img src="https://github.com/user-attachments/assets/a7c213c8-cf43-4a0e-ac86-fcc67135f055" width="200" alt="img8" /> | <img src="https://github.com/user-attachments/assets/5b69db5e-2858-47ee-9c2f-0c281e2bb1e7" width="200" alt="img9" /> |
+
+---
 
 ## 📜 Licencia y Uso Académico
 
