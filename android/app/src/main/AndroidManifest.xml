@@ -1,0 +1,65 @@
+<?xml version="1.0" encoding="utf-8"?>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <application
+        android:allowBackup="true"
+        android:icon="@mipmap/ic_launcher"
+        android:label="@string/app_name"
+        android:roundIcon="@mipmap/ic_launcher_round"
+        android:supportsRtl="true"
+        android:theme="@style/AppTheme">
+
+        <activity
+            android:configChanges="orientation|keyboardHidden|keyboard|screenSize|locale|smallestScreenSize|screenLayout|uiMode|navigation"
+            android:name=".MainActivity"
+            android:label="@string/title_activity_main"
+            android:theme="@style/AppTheme.NoActionBarLaunch"
+            android:launchMode="singleTask"
+            android:exported="true">
+
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+
+        </activity>
+
+        <provider
+            android:name="androidx.core.content.FileProvider"
+            android:authorities="${applicationId}.fileprovider"
+            android:exported="false"
+            android:grantUriPermissions="true">
+            <meta-data
+                android:name="android.support.FILE_PROVIDER_PATHS"
+                android:resource="@xml/file_paths"></meta-data>
+        </provider>
+    </application>
+
+    <!-- ================================================================= -->
+    <!-- PERMISOS DE LA APLICACIÓN                                         -->
+    <!-- ================================================================= -->
+
+    <!-- Acceso a Internet: Requerido para comunicación de red, visualización de mapas (Google Maps) y navegación -->
+    <uses-permission android:name="android.permission.INTERNET" />
+
+    <!-- Estado de red: Permite a la app comprobar si el dispositivo tiene conexión a Internet (Wi-Fi / Datos móviles) -->
+    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
+
+    <!-- Ubicación aproximada: Permite acceder a la ubicación estimada mediante celdas de telefonía y Wi-Fi -->
+    <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
+
+    <!-- Ubicación precisa: Permite acceder a la ubicación exacta mediante el sensor GPS satelital del dispositivo -->
+    <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
+
+    <!-- Declaración del hardware GPS: Indica al sistema que la app utiliza el sensor GPS para la geolocalización -->
+    <uses-feature android:name="android.hardware.location.gps" android:required="false" />
+
+    <!-- Almacenamiento (Lectura): Permite leer archivos del almacenamiento del dispositivo -->
+    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
+
+    <!-- Almacenamiento (Escritura): Permite crear y guardar reportes o archivos (ej. ubicacion_actual.txt) -->
+    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
+
+    <!-- Vibración: Permite emitir respuestas hápticas y vibración al interactuar con la app (@capacitor/haptics) -->
+    <uses-permission android:name="android.permission.VIBRATE" />
+</manifest>
