@@ -1,6 +1,19 @@
 import { Component, OnDestroy, OnInit, signal } from '@angular/core';
-import { IonButton, IonCard, IonCardContent, IonCardHeader, IonCardTitle, IonContent, IonHeader, IonTitle, IonToolbar } from '@ionic/angular/standalone';
+import { 
+  AlertController,
+  IonButton, 
+  IonCard, 
+  IonCardContent, 
+  IonCardHeader, 
+  IonCardTitle, 
+  IonContent, 
+  IonHeader, 
+  IonTitle, 
+  IonToolbar 
+} from '@ionic/angular/standalone';
 import { NgIf } from '@angular/common';
+import { Capacitor } from '@capacitor/core';
+import { Filesystem, Directory, Encoding } from '@capacitor/filesystem';
 import { LocationService } from '../services/location';
 
 @Component({
@@ -20,7 +33,10 @@ export class HomePage implements OnInit, OnDestroy {
   watchId: string | null = null;
   errorMsg = signal<string | null>(null);
 
-  constructor(private loc: LocationService) {}
+  constructor(
+    private loc: LocationService,
+    private alertCtrl: AlertController
+  ) {}
 
   async ngOnInit() {
     await this.loc.ensurePermissions();
@@ -83,13 +99,75 @@ Longitud: ${lng}
 Enlace: https://www.google.com/maps?q=${lat},${lng}
 ----------------------------------------`;
 
-    // Crear y descargar el archivo .txt de forma sencilla
-    const blob = new Blob([contenido], { type: 'text/plain;charset=utf-8' });
-    const enlace = document.createElement('a');
-    enlace.href = URL.createObjectURL(blob);
-    enlace.download = 'ubicacion_actual.txt';
-    enlace.click();
-    URL.revokeObjectURL(enlace.href);
+    try {
+      if (Capacitor.isNativePlatform()) {
+        // En celular (Android / iOS): Guardar con @capacitor/filesystem
+        try {
+          const permStatus = await Filesystem.checkPermissions();
+          if (permStatus.publicStorage !== 'granted') {
+            await Filesystem.requestPermissions();
+          }
+        } catch {
+          // Permisos gestionados automáticamente en versiones recientes de Android
+        }
+
+        const fileName = 'ubicacion_actual.txt';
+        let res;
+        try {
+          res = await Filesystem.writeFile({
+            path: fileName,
+            data: contenido,
+            directory: Directory.Documents,
+            encoding: Encoding.UTF8,
+            recursive: true
+          });
+        } catch {
+          // Si Documents presenta restricciones de permisos, guardar en directorio de datos de la app
+          res = await Filesystem.writeFile({
+            path: fileName,
+            data: contenido,
+            directory: Directory.Data,
+            encoding: Encoding.UTF8,
+            recursive: true
+          });
+        }
+
+        this.errorMsg.set(null);
+
+        const alert = await this.alertCtrl.create({
+          header: 'Ubicación Guardada',
+          subHeader: 'Archivo guardado en el celular',
+          message: `El archivo "${fileName}" se guardó exitosamente.\n\nRuta:\n${res.uri}`,
+          buttons: ['Aceptar']
+        });
+        await alert.present();
+      } else {
+        // En computadora (Navegador web): Descarga automática mediante Blob
+        const blob = new Blob([contenido], { type: 'text/plain;charset=utf-8' });
+        const enlace = document.createElement('a');
+        enlace.href = URL.createObjectURL(blob);
+        enlace.download = 'ubicacion_actual.txt';
+        enlace.click();
+        URL.revokeObjectURL(enlace.href);
+
+        this.errorMsg.set(null);
+
+        const alert = await this.alertCtrl.create({
+          header: 'Ubicación Descargada',
+          message: 'El archivo "ubicacion_actual.txt" se ha descargado en tu equipo.',
+          buttons: ['Aceptar']
+        });
+        await alert.present();
+      }
+    } catch (e: any) {
+      this.errorMsg.set(e?.message ?? 'Error al guardar el archivo de ubicación');
+      const alert = await this.alertCtrl.create({
+        header: 'Error al Guardar',
+        message: e?.message ?? 'No se pudo generar el archivo en el dispositivo.',
+        buttons: ['Aceptar']
+      });
+      await alert.present();
+    }
   }
 
   ngOnDestroy() {
