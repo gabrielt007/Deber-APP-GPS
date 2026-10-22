@@ -33,6 +33,11 @@ export class HomePage implements OnInit, OnDestroy {
   watchId: string | null = null;
   errorMsg = signal<string | null>(null);
 
+
+  readonly DESTINO_LAT = -0.0753388; 
+  readonly DESTINO_LNG = -78.4450883;
+
+
   constructor(
     private loc: LocationService,
     private alertCtrl: AlertController
@@ -169,8 +174,29 @@ Enlace: https://www.google.com/maps?q=${lat},${lng}
       await alert.present();
     }
   }
+  
+  async mostrarRutaDestino() {
+    // 1. Verificar que tengamos coordenadas actuales
+    if (this.latitude() === null || this.longitude() === null) {
+      await this.obtenerUbicacionActual();
+      if (this.latitude() === null || this.longitude() === null) {
+        this.errorMsg.set('No se pudo obtener la ubicación actual para trazar la ruta.');
+        return;
+      }
+    }
+
+    // 2. Construir la URL con el formato oficial de Google Maps
+    const latActual = this.latitude();
+    const lngActual = this.longitude();
+    const urlRuta = `https://www.google.com/maps/dir/?api=1&origin=${latActual},${lngActual}&destination=${this.DESTINO_LAT},${this.DESTINO_LNG}`;
+
+    // 3. Abrir el enlace. 
+    // '_system' asegura que se abra la app nativa de Google Maps en el celular, 
+    // o el navegador por defecto en la computadora.
+    window.open(urlRuta, '_system');
+  }
 
   ngOnDestroy() {
     if (this.watchId) this.loc.clearWatch(this.watchId);
   }
-}
+}

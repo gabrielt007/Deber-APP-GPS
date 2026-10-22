@@ -1,6 +1,13 @@
-import { enableProdMode, importProvidersFrom } from '@angular/core';
+import { enableProdMode } from '@angular/core';
 import { bootstrapApplication } from '@angular/platform-browser';
 import { AppComponent } from './app/app.component';
 import { appConfig } from './app/app.config';
+import { addIcons } from 'ionicons';
+import { navigateOutline } from 'ionicons/icons'; 
+
+
+addIcons({
+  'navigate-outline': navigateOutline
+});
 
 bootstrapApplication(AppComponent, appConfig).catch(err => console.error(err));

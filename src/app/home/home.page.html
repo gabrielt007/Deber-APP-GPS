@@ -23,6 +23,11 @@
     Obtener ubicación actual
   </ion-button>
 
+  <ion-button expand="block" color="success" (click)="mostrarRutaDestino()">
+    Trazar ruta a mi destino
+  </ion-button>
+
+
   <ion-button expand="block" (click)="iniciarSeguimiento()" [disabled]="watchId !== null">
     Iniciar seguimiento
   </ion-button>
